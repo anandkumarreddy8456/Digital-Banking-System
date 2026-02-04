@@ -1,10 +1,10 @@
-package com.banking.digita;
+package com.banking.digital;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApplicationTests {
+class EurekaServerApplicationTests {
 
 	@Test
 	void contextLoads() {
