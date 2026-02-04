@@ -2,7 +2,7 @@
 
 -- Customer Service End Points --
 
-| Method | Endpoint                         | Description           |
+| Method | Endpoint                         | Description           |             
 | ------ | -------------------------------- | --------------------- |
 | POST   | `/api/customers/register`        | Register new customer |
 | POST   | `/api/customers/login`           | Customer login        |
@@ -12,7 +12,14 @@
 | GET    | `/api/customers/all`             | List all customers    |
 | GET    | `/api/customers/email/{email}`   | Get by email          |
 | PUT    | `/api/customers/change-password` | Change password       |
-
+ sample JSON
+{
+"name": "Ravi Kumar",
+"email": "ravi@gmail.com",
+"mobile": "9876543210",
+"password": "pass123",
+"address": "Bangalore"
+}
 
 -- Account Service -- 
 
@@ -27,6 +34,14 @@
 | PUT    | `/api/accounts/block/{accountNo}`     | Block account                |
 | PUT    | `/api/accounts/unblock/{accountNo}`   | Unblock account              |
 
+{
+"customerId": 101,
+"accountType": "SAVINGS",
+"initialDeposit": 5000
+}
+
+
+
 -- Transaction Service ---
 
 | Method | Endpoint                                  | Description                 |
@@ -38,6 +53,12 @@
 | GET    | `/api/transactions/date-range`            | Filter by date              |
 | POST   | `/api/transactions/reverse/{txnId}`       | Reverse transaction         |
 | GET    | `/api/transactions/statement/{accountNo}` | Mini statement              |
+
+{
+"fromAccount": "10001",
+"toAccount": "10002",
+"amount": 2000
+}
 
 
 -- Loan Service -- 
@@ -52,6 +73,15 @@
 | GET    | `/api/loans/status/{loanId}`       | Check loan status |
 | GET    | `/api/loans/calculate-emi`         | EMI calculator    |
 | PUT    | `/api/loans/pay-emi`               | Pay EMI           |
+
+
+{
+"customerId": 101,
+"amount": 500000,
+"tenure": 24,
+"loanType": "PERSONAL"
+}
+
 
 
 -- Notification Service -- 
@@ -72,9 +102,17 @@ Loan rejected
 
 -- Auth Service -- 
 
-| Method | Endpoint             | Description          |
-| ------ | -------------------- | -------------------- |
-| POST   | `/api/auth/login`    | JWT token generation |
-| POST   | `/api/auth/register` | User registration    |
-| POST   | `/api/auth/validate` | Validate token       |
-| POST   | `/api/auth/refresh`  | Refresh JWT token    |
+| Method | Endpoint                    | Purpose            |
+| ------ | --------------------------- | ------------------ |
+| POST   | `/api/auth/register`        | Register user      |
+| POST   | `/api/auth/login`           | Generate JWT token |
+| POST   | `/api/auth/validate`        | Validate token     |
+| POST   | `/api/auth/refresh-token`   | Refresh JWT        |
+| POST   | `/api/auth/logout`          | Invalidate token   |
+| GET    | `/api/auth/user/{id}`       | Get user details   |
+| PUT    | `/api/auth/change-password` | Change password    |
+
+{
+"username": "ravi",
+"password": "pass123"
+}
