@@ -29,14 +29,12 @@ public class AccountService {
         return "Account Created Successfully";
     }
     public BalanceResponse getBalance(String accountNumber) {
-
         Account account = repository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
         return new BalanceResponse(account.getAccountNumber(), account.getBalance());
     }
     public String deposit(TransactionRequest request) {
-
         Account account = repository.findByAccountNumber(request.getAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
@@ -46,7 +44,6 @@ public class AccountService {
         return "Amount Deposited Successfully";
     }
     public String withdraw(TransactionRequest request) {
-
         Account account = repository.findByAccountNumber(request.getAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 

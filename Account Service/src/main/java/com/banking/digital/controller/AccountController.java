@@ -18,8 +18,8 @@ public class AccountController {
         return service.createAccount(request);
     }
 
-    @GetMapping("/balance/{accountNumber}")
-    public BalanceResponse getBalance(@PathVariable String accountNumber) {
+    @GetMapping("/balance")
+    public BalanceResponse getBalance(@RequestParam("accountNumber") String accountNumber) {
         return service.getBalance(accountNumber);
     }
 
