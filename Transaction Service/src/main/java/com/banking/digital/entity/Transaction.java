@@ -20,13 +20,16 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fromAccount;
+    @Column(unique = true)
+    private String referenceId;
 
+    private String fromAccount;
     private String toAccount;
 
     private BigDecimal amount;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
 
     private LocalDateTime transactionDate = LocalDateTime.now();
 }
