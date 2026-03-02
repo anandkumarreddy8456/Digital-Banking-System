@@ -1,4 +1,7 @@
 package com.banking.digital.repository;
 
-public interface NotificationRepository {
+import com.banking.digital.entity.Notification;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface NotificationRepository extends JpaRepository<Notification,Long> {
 }
