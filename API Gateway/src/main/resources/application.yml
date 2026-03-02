@@ -1,49 +1,6 @@
-server:
-  port: 8080
-
 spring:
   application:
     name: api-gateway
 
-  cloud:
-    gateway:
-      routes:
-
-        - id: auth-service
-          uri: lb://AUTH-SERVICE
-          predicates:
-            - Path=/api/auth/**
-
-        - id: account-service
-          uri: lb://ACCOUNT-SERVICE
-          predicates:
-            - Path=/api/accounts/**
-
-        - id: transaction-service
-          uri: lb://TRANSACTION-SERVICE
-          predicates:
-              - Path=/api/transactions/**
-
-        - id: customer-service
-          uri: lb://CUSTOMER-SERVICE
-          predicates:
-            - Path=/api/customers/**
-
-        - id: loan-service
-          uri: lb://LOAN-SERVICE
-          predicates:
-            - Path=/api/loans/**
-
-        - id: card-service
-          uri: lb://CARD-SERVICE
-          predicates:
-            - Path=/api/cards/**
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-  
-  instance:
-    hostname: localhost
-    prefer-ip-address: true
+  config:
+    import: optional:configserver:http://localhost:8888
