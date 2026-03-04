@@ -1,14 +1,22 @@
 package com.banking.digital.service;
 
+import com.banking.digital.common.ApiResponse;
+import com.banking.digital.common.ConstantMessages;
 import com.banking.digital.dto.LoanRequest;
 import com.banking.digital.dto.LoanResponse;
 import com.banking.digital.entity.Loan;
 import com.banking.digital.entity.LoanStatus;
+import com.banking.digital.feign.AccountClient;
+import com.banking.digital.feign.NotificationClient;
 import com.banking.digital.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class LoanService {
@@ -16,13 +24,27 @@ public class LoanService {
     @Autowired
     private LoanRepository repository;
 
-    public LoanResponse apply(LoanRequest request) {
+    @Autowired
+    private AccountClient accountClient;
 
+    @Autowired
+    private NotificationClient notificationClient;
+
+    public ResponseEntity<ApiResponse<LoanResponse>> apply(LoanRequest request) {
+        ApiResponse<String> accountResponse =
+                accountClient.getAccountNumberByMobile(request.getMobileNumber());
+
+        String accountNumber = accountResponse.getData();
+        if(accountNumber == null){
+           return new ResponseEntity<>( new ApiResponse<LoanResponse>(HttpStatus.NOT_FOUND.value(), ConstantMessages.accountNotFound,null),HttpStatus.NOT_FOUND);
+        }
         double rate = 10.0; // fixed 10% interest
         BigDecimal emi = calculateEmi(request.getAmount(), rate, request.getTenure());
 
         Loan loan = new Loan();
         loan.setCustomerId(request.getCustomerId());
+        loan.setMobileNumber(request.getMobileNumber());
+        loan.setAccountNumber(accountNumber);
         loan.setAmount(request.getAmount());
         loan.setTenure(request.getTenure());
         loan.setInterestRate(rate);
@@ -31,31 +53,59 @@ public class LoanService {
         loan.setLoanType(request.getLoanType());
 
         repository.save(loan);
+        // 4️⃣ Send Notification
+        Map<String, String> notification = new HashMap<>();
+        notification.put("recipient", accountNumber);
+        notification.put("message", "Loan application submitted successfully");
+        notification.put("type", "EMAIL");
 
-        return new LoanResponse(
+        notificationClient.sendNotification(notification);
+
+        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.ACCEPTED.value(), ConstantMessages.loanCreated, new LoanResponse(
                 loan.getId(),
                 loan.getAmount(),
                 loan.getTenure(),
                 loan.getEmi(),
                 loan.getStatus().name()
-        );
+        )), HttpStatus.ACCEPTED);
     }
-    public LoanResponse approve(Long loanId) {
+
+    public ResponseEntity<ApiResponse<LoanResponse>> approve(Long loanId) {
 
         Loan loan = repository.findById(loanId)
-                .orElseThrow(() -> new RuntimeException("Loan not found"));
+                .orElseThrow(() -> new RuntimeException(ConstantMessages.loanNotFound));
 
+        // Update Loan Status
         loan.setStatus(LoanStatus.APPROVED);
         repository.save(loan);
 
-        return new LoanResponse(
+        // Send Notification
+        Map<String, String> notification = new HashMap<>();
+        notification.put("recipient", loan.getAccountNumber());
+        notification.put("message", "Your loan has been approved successfully");
+        notification.put("type", "EMAIL");
+
+        notificationClient.sendNotification(notification);
+
+        // Prepare Response
+        LoanResponse loanResponse = new LoanResponse(
                 loan.getId(),
                 loan.getAmount(),
                 loan.getTenure(),
                 loan.getEmi(),
                 loan.getStatus().name()
         );
+
+        return new ResponseEntity<>(
+                new ApiResponse<>(
+                        HttpStatus.OK.value(),
+                        ConstantMessages.loanApproved,
+                        loanResponse
+                ),
+                HttpStatus.OK
+        );
     }
+
     private BigDecimal calculateEmi(BigDecimal principal, double rate, int tenure) {
 
         double monthlyRate = rate / (12 * 100);

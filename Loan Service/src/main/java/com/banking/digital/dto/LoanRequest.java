@@ -11,4 +11,5 @@ public class LoanRequest {
     private BigDecimal amount;
     private Integer tenure;
     private LoanType loanType;
+    private String mobileNumber;
 }

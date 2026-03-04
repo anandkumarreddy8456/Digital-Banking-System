@@ -37,5 +37,9 @@ public class Loan {
     @Enumerated(EnumType.STRING)
     private LoanType loanType;
 
+    private String accountNumber;
+
+    private String mobileNumber;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 }

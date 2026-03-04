@@ -1,9 +1,11 @@
 package com.banking.digital.controller;
 
+import com.banking.digital.common.ApiResponse;
 import com.banking.digital.dto.LoanRequest;
 import com.banking.digital.dto.LoanResponse;
 import com.banking.digital.service.LoanService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,12 +16,12 @@ public class LoanController {
     private LoanService service;
 
     @PostMapping("/apply")
-    public LoanResponse apply(@RequestBody LoanRequest request) {
+    public ResponseEntity<ApiResponse<LoanResponse>>  apply(@RequestBody LoanRequest request) {
         return service.apply(request);
     }
 
     @PutMapping("/approve")
-    public LoanResponse approve(@RequestParam Long loanId) {
+    public ResponseEntity<ApiResponse<LoanResponse>> approve(@RequestParam Long loanId) {
         return service.approve(loanId);
     }
 }
