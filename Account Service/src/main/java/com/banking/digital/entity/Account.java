@@ -23,9 +23,16 @@ public class Account {
 
     private Long customerId;
 
+    private String accountHolderName;
+
+    private int accountHolderAge;
+
     private String accountType; // SAVINGS / CURRENT
 
     private BigDecimal balance;
+
+    @Column(unique = true)
+    private String mobileNumber;
 
     private String status; // ACTIVE / BLOCKED
 

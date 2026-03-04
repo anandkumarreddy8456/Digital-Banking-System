@@ -1,10 +1,12 @@
 package com.banking.digital.controller;
 
+import com.banking.digital.common.ApiResponse;
 import com.banking.digital.dto.BalanceResponse;
 import com.banking.digital.dto.CreateAccountRequest;
 import com.banking.digital.dto.TransactionRequest;
 import com.banking.digital.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,22 +16,22 @@ public class AccountController {
     private AccountService service;
 
     @PostMapping("/create")
-    public String createAccount(@RequestBody CreateAccountRequest request) {
+    public ResponseEntity<ApiResponse<String>> createAccount(@RequestBody CreateAccountRequest request) {
         return service.createAccount(request);
     }
 
     @GetMapping("/balance")
-    public BalanceResponse getBalance(@RequestParam("accountNumber") String accountNumber) {
+    public ResponseEntity<ApiResponse< BalanceResponse>> getBalance(@RequestParam("accountNumber") String accountNumber) {
         return service.getBalance(accountNumber);
     }
 
     @PutMapping("/deposit")
-    public String deposit(@RequestBody TransactionRequest request) {
+    public ResponseEntity<ApiResponse<String>> deposit(@RequestBody TransactionRequest request) {
         return service.deposit(request);
     }
 
     @PutMapping("/withdraw")
-    public String withdraw(@RequestBody TransactionRequest request) {
+    public ResponseEntity<ApiResponse<String>> withdraw(@RequestBody TransactionRequest request) {
         return service.withdraw(request);
     }
 
