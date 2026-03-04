@@ -36,5 +36,7 @@ public class Card {
 
     private LocalDate expiryDate;
 
+    private String mobileNumber;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 }

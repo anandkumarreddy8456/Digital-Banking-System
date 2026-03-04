@@ -10,4 +10,5 @@ public class CardRequest {
     private String accountNumber;
     private CardType cardType;
     private BigDecimal limitAmount;
+    private String mobileNumber;
 }

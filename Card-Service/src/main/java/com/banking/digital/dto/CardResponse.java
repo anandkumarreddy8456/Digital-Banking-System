@@ -9,4 +9,5 @@ public class CardResponse {
     private String cardNumber;
     private String cardType;
     private String status;
+    private String mobileNumber;
 }
