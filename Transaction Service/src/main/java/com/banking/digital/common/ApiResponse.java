@@ -1,4 +1,14 @@
 package com.banking.digital.common;
 
-public class ApiResponse {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ApiResponse <T> {
+    private int statusCode;
+    private String ApiResponse;
+    private T data;
 }
