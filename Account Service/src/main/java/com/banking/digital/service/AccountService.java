@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Service
 public class AccountService {
 
@@ -21,6 +24,22 @@ public class AccountService {
 
     public ResponseEntity<ApiResponse<String>> createAccount(CreateAccountRequest request) {
         try {
+
+            if (request.getMobileNumber() == null || request.getMobileNumber().trim().isEmpty()) {
+                return new ResponseEntity<>(
+                        new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.mobileNumberMissing, null),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+
+            if (request.getAccountHolderAge()<=0) {
+                return new ResponseEntity<>(
+                        new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.ageMissing, null),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
             if(request.getAccountHolderAge()<18){
                 return new ResponseEntity<>(
                         new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.ageIsNotValid, null),
@@ -140,5 +159,30 @@ public class AccountService {
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
+    }
+
+    public ResponseEntity<ApiResponse<String>> getAccountNumberByMobile(String number) {
+
+        Optional<Account> accountOptional = repository.findByMobileNumber(number);
+
+        if (accountOptional.isEmpty()) {
+            ApiResponse<String> response = new ApiResponse<>(
+                    HttpStatus.NOT_FOUND.value(),
+                    ConstantMessages.accountNumberNotAllocated,
+                    null
+            );
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        String accountNumber = accountOptional.get().getAccountNumber();
+
+        ApiResponse<String> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                ConstantMessages.accountNumberFetchedSuccessfully,
+                accountNumber
+        );
+
+        return ResponseEntity.ok(response);
     }
 }

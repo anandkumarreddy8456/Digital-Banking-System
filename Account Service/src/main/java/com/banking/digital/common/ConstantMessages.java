@@ -13,4 +13,10 @@ public class ConstantMessages {
     public static final String mobileAlreadyAllocated="MOBILE NUMBER IS ALLOCATED TO ANOTHER ACCOUNT";
     public static final String ageIsNotValid="ACCOUNT HOLDER MUST BE AT LEAST 18 YEARS OLD";
     public static final String active="ACTIVE";
+    public static final String accountNumberNotAllocated="ACCOUNT NOT FOUND FOR GIVEN MOBILE NUMBER";
+    public static final String accountNumberFetchedSuccessfully="ACCOUNT NUMBER FETCHED SUCCESSFULLY";
+    public static final String mobileNumberMissing="MOBILE NUMBER IS MISSING";
+    public static final String ageMissing="AGE FIELD IS MISSING";
+
 }
+

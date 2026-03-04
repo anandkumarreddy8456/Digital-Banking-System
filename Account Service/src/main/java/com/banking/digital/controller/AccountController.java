@@ -34,5 +34,9 @@ public class AccountController {
     public ResponseEntity<ApiResponse<String>> withdraw(@RequestBody TransactionRequest request) {
         return service.withdraw(request);
     }
+    @GetMapping("/accountNumber")
+    public ResponseEntity<ApiResponse<String>> getAccountNumberByMobile(@RequestParam String number){
+        return service.getAccountNumberByMobile(number);
+    }
 
 }
