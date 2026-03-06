@@ -4,8 +4,10 @@ import com.banking.digital.common.ApiResponse;
 import com.banking.digital.common.ConstantMessages;
 import com.banking.digital.dto.BalanceResponse;
 import com.banking.digital.dto.CreateAccountRequest;
+import com.banking.digital.dto.CustomerResponse;
 import com.banking.digital.dto.TransactionRequest;
 import com.banking.digital.entity.Account;
+import com.banking.digital.feign.CustomerClient;
 import com.banking.digital.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,9 @@ public class AccountService {
 
     @Autowired
     private AccountRepository repository;
+
+    @Autowired
+    private CustomerClient customerClient;
 
     public ResponseEntity<ApiResponse<String>> createAccount(CreateAccountRequest request) {
         try {
@@ -46,6 +51,14 @@ public class AccountService {
                         HttpStatus.BAD_REQUEST
                 );
             }
+            CustomerResponse customerResponse=customerClient.getCustomerById(request.getCustomerId()).getData();
+            if(customerResponse == null){
+                return new ResponseEntity<>(
+                        new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.customerIdNotMatched, null),
+                        HttpStatus.BAD_REQUEST
+                );
+
+            }
             if (repository.findByMobileNumber(request.getMobileNumber()).isPresent()) {
                 return new ResponseEntity<>(
                         new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.mobileAlreadyAllocated, null),
@@ -58,11 +71,11 @@ public class AccountService {
             } while (repository.findByAccountNumber(accountNumber).isPresent());
             Account account = new Account();
             account.setAccountNumber(accountNumber);
-            account.setAccountHolderName(request.getAccountHolderName());
+            account.setAccountHolderName(customerResponse.getName());
             account.setAccountHolderAge(request.getAccountHolderAge());
             account.setMobileNumber(request.getMobileNumber());
             account.setAccountType(request.getAccountType());
-            account.setCustomerId(request.getCustomerId());
+            account.setCustomerId(customerResponse.getId());
             account.setStatus(ConstantMessages.active);
             account.setBalance(request.getInitialDeposit() != null ? request.getInitialDeposit() : BigDecimal.ZERO);
             repository.save(account);

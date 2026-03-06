@@ -17,6 +17,7 @@ public class ConstantMessages {
     public static final String accountNumberFetchedSuccessfully="ACCOUNT NUMBER FETCHED SUCCESSFULLY";
     public static final String mobileNumberMissing="MOBILE NUMBER IS MISSING";
     public static final String ageMissing="AGE FIELD IS MISSING";
+    public static final String customerIdNotMatched="CUSTOMER ID NOT FOUND";
 
 }
 
