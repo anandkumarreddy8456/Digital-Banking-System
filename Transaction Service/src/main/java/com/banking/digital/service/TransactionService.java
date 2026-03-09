@@ -1,5 +1,7 @@
 package com.banking.digital.service;
 
+import com.banking.digital.common.ApiResponse;
+import com.banking.digital.common.ConstantMessages;
 import com.banking.digital.dto.AccountTransactionRequest;
 import com.banking.digital.dto.TransferRequest;
 import com.banking.digital.entity.Transaction;
@@ -9,7 +11,10 @@ import com.banking.digital.feign.NotificationClient;
 import com.banking.digital.repository.TransactionRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
+import org.apache.http.protocol.HTTP;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -28,10 +33,10 @@ public class TransactionService {
 
     @Transactional
     @CircuitBreaker(name = "accountService", fallbackMethod = "fallbackTransfer")
-    public String transfer(TransferRequest request) {
+    public ResponseEntity<ApiResponse<String>> transfer(TransferRequest request) {
 
         if (repository.existsByReferenceId(request.getReferenceId())) {
-            return "Duplicate Transaction Request";
+            return new ResponseEntity<>(new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.duplicateTrsReq,ConstantMessages.transactionId),HttpStatus.BAD_REQUEST);
         }
 
         Transaction txn = new Transaction();
