@@ -198,4 +198,28 @@ public class AccountService {
 
         return ResponseEntity.ok(response);
     }
+    public ResponseEntity<ApiResponse<String>> getAccountNumberByAccountNumber(String accNumber){
+        Optional<Account> accountOptional = repository.findByAccountNumber(accNumber);
+
+        if (accountOptional.isEmpty()) {
+            ApiResponse<String> response = new ApiResponse<>(
+                    HttpStatus.NOT_FOUND.value(),
+                    ConstantMessages.accountNumberNotAvailable,
+                    null
+            );
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        String accountNumber = accountOptional.get().getAccountNumber();
+
+        ApiResponse<String> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                ConstantMessages.accountNumberFetchedSuccessfully,
+                accountNumber
+        );
+
+        return ResponseEntity.ok(response);
+
+    }
 }

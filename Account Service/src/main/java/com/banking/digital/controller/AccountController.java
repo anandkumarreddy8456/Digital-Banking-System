@@ -39,4 +39,10 @@ public class AccountController {
         return service.getAccountNumberByMobile(number);
     }
 
+    @GetMapping("/isValidAccountNumber")
+    public ResponseEntity<ApiResponse<String>> getAccountNumberByAccount(@RequestParam String accountNumber){
+        return service.getAccountNumberByMobile(accountNumber);
+    }
+
+
 }
