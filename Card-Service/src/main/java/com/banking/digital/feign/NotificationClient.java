@@ -1,5 +1,6 @@
 package com.banking.digital.feign;
 
+import com.banking.digital.common.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,6 @@ import java.util.Map;
 public interface NotificationClient {
 
     @PostMapping("/api/notifications/send")
-    String sendNotification(@RequestBody Map<String, String> request);
+    ApiResponse<String> sendNotification(@RequestBody Map<String, String> request);
 
 }
