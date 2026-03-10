@@ -1,8 +1,10 @@
 package com.banking.digital.Controller;
 
+import com.banking.digital.Common.ApiResponse;
 import com.banking.digital.dto.NotificationRequest;
 import com.banking.digital.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +17,7 @@ public class NotificationController {
     private NotificationService service;
 
     @PostMapping("/send")
-    public String send(@RequestBody NotificationRequest request) {
+    public ResponseEntity<ApiResponse<String>> send(@RequestBody NotificationRequest request) {
         return service.send(request);
     }
 }

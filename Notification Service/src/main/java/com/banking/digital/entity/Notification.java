@@ -27,5 +27,7 @@ public class Notification {
 
     private String status;
 
+    private String mobile;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 }

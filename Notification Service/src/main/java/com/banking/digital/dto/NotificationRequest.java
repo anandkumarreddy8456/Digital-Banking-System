@@ -8,4 +8,5 @@ public class NotificationRequest {
     private String recipient;
     private String message;
     private String type;
+    private String mobile;
 }
