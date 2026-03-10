@@ -28,12 +28,11 @@ public class TransactionController {
 
     @GetMapping("/getByReferenceId")
     public ResponseEntity<ApiResponse<Transaction>> getByReference(@RequestParam("referenceId") String referenceId) {
-        return repository.findByReferenceId(referenceId)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        return service.getByReference(referenceId);
     }
 
     @GetMapping("/account/getByAccount")
-    public ApiResponse<ResponseEntity<List<Transaction>>> getByAccount(@RequestParam("accountNumber") String accountNumber) {
-        return repository.findByFromAccountOrToAccount(accountNumber, accountNumber);
+    public ResponseEntity<ApiResponse<List<Transaction>>> getByAccount(@RequestParam("accountNumber") String accountNumber) {
+        return service.getByAccount(accountNumber);
     }
 }
