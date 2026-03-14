@@ -21,15 +21,22 @@ public class CustomerService {
 
     public ResponseEntity<ApiResponse<CustomerResponse>> create(CustomerRequest request) {
 
+
         if (repository.findByEmail(request.getEmail()).isPresent()) {
-            return new ResponseEntity<>(new ApiResponse<CustomerResponse>(HttpStatus.CONTINUE.value(), ConstantMessages.emailIDAlreadyExists,null),HttpStatus.ALREADY_REPORTED);
+            return new ResponseEntity<>(new ApiResponse<>(HttpStatus.CONTINUE.value(), ConstantMessages.emailIDAlreadyExists,null),HttpStatus.ALREADY_REPORTED);
         }
         if (repository.findByMobile(request.getMobile()).isPresent()) {
-            return new ResponseEntity<>(new ApiResponse<CustomerResponse>(HttpStatus.CONTINUE.value(), ConstantMessages.phoneNumberAlreadyExists,null),HttpStatus.ALREADY_REPORTED);
+            return new ResponseEntity<>(new ApiResponse<>(HttpStatus.CONTINUE.value(), ConstantMessages.phoneNumberAlreadyExists,null),HttpStatus.ALREADY_REPORTED);
         }
 
+        if(request.getAge()<18){
+            return new ResponseEntity<>(new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.ageIsNotValid,null),HttpStatus.BAD_REQUEST);
+        }
+
+
         Customer customer = new Customer();
-        customer.setName(request.getName());
+        customer.setCustomerName(request.getName());
+        customer.setCustomerAge(request.getAge());
         customer.setEmail(request.getEmail());
         customer.setMobile(request.getMobile());
         customer.setAddress(request.getAddress());
@@ -37,10 +44,11 @@ public class CustomerService {
         repository.save(customer);
 
         return new ResponseEntity<>(new ApiResponse<>(HttpStatus.ACCEPTED.value(), ConstantMessages.customerCreatedSuccessfully,new CustomerResponse(
-                customer.getId(),
-                customer.getName(),
+               customer.getId(),
+                customer.getCustomerName(),
                 customer.getEmail(),
                 customer.getMobile(),
+                customer.getCustomerAge(),
                 customer.getAddress()
         )),HttpStatus.ACCEPTED);
     }
@@ -50,9 +58,10 @@ public class CustomerService {
                     .orElseThrow(() -> new RuntimeException(ConstantMessages.customerNotFound));
             return new ResponseEntity<>(new ApiResponse<CustomerResponse>(HttpStatus.ACCEPTED.value(), ConstantMessages.customerDetails,new CustomerResponse(
                     customer.getId(),
-                    customer.getName(),
+                    customer.getCustomerName(),
                     customer.getEmail(),
                     customer.getMobile(),
+                    customer.getCustomerAge(),
                     customer.getAddress()
             )),HttpStatus.ACCEPTED);
         } catch (RuntimeException e) {
@@ -66,9 +75,10 @@ public class CustomerService {
        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.ACCEPTED.value(), ConstantMessages.customerDetails,repository.findAll().stream()
                 .map(c -> new CustomerResponse(
                         c.getId(),
-                        c.getName(),
+                        c.getCustomerName(),
                         c.getEmail(),
                         c.getMobile(),
+                        c.getCustomerAge(),
                         c.getAddress()
                 ))
                 .collect(Collectors.toList())),HttpStatus.ACCEPTED);

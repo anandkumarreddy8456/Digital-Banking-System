@@ -7,5 +7,6 @@ public class ConstantMessages {
     public static final String loanNotFound="LOAN NOT FOUND";
     public static final String internalServerError="INTERNAL SERVER ERROR";
     public static final String accountNotFound="ACCOUNT NOT FOUND FOR GIVEN MOBILE NUMBER";
+    public static final String customerIdNotMatched="CUSTOMER ID NOT FOUND";
 //    public static final S
 }

@@ -19,11 +19,14 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String customerName;
+
+    private int customerAge;
 
     @Column(unique = true)
     private String email;
 
+    @Column(unique = true)
     private String mobile;
 
     private String address;

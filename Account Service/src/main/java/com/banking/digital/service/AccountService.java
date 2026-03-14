@@ -38,19 +38,7 @@ public class AccountService {
             }
 
 
-            if (request.getAccountHolderAge()<=0) {
-                return new ResponseEntity<>(
-                        new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.ageMissing, null),
-                        HttpStatus.BAD_REQUEST
-                );
-            }
 
-            if(request.getAccountHolderAge()<18){
-                return new ResponseEntity<>(
-                        new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.ageIsNotValid, null),
-                        HttpStatus.BAD_REQUEST
-                );
-            }
             CustomerResponse customerResponse=customerClient.getCustomerById(request.getCustomerId()).getData();
             if(customerResponse == null){
                 return new ResponseEntity<>(
@@ -72,7 +60,7 @@ public class AccountService {
             Account account = new Account();
             account.setAccountNumber(accountNumber);
             account.setAccountHolderName(customerResponse.getName());
-            account.setAccountHolderAge(request.getAccountHolderAge());
+            account.setAccountHolderAge(customerResponse.getAge());
             account.setMobileNumber(request.getMobileNumber());
             account.setAccountType(request.getAccountType());
             account.setCustomerId(customerResponse.getId());

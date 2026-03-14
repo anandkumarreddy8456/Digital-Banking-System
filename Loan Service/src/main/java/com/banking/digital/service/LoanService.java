@@ -2,11 +2,13 @@ package com.banking.digital.service;
 
 import com.banking.digital.common.ApiResponse;
 import com.banking.digital.common.ConstantMessages;
+import com.banking.digital.dto.CustomerResponse;
 import com.banking.digital.dto.LoanRequest;
 import com.banking.digital.dto.LoanResponse;
 import com.banking.digital.entity.Loan;
 import com.banking.digital.entity.LoanStatus;
 import com.banking.digital.feign.AccountClient;
+import com.banking.digital.feign.CustomerClient;
 import com.banking.digital.feign.NotificationClient;
 import com.banking.digital.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +29,24 @@ public class LoanService {
     @Autowired
     private AccountClient accountClient;
 
+
+    @Autowired
+    private CustomerClient customerClient;
+
     @Autowired
     private NotificationClient notificationClient;
 
     public ResponseEntity<ApiResponse<LoanResponse>> apply(LoanRequest request) {
         ApiResponse<String> accountResponse =
                 accountClient.getAccountNumberByMobile(request.getMobileNumber());
+        CustomerResponse customerResponse=customerClient.getCustomerById(request.getCustomerId()).getData();
+        if(customerResponse == null){
+            return new ResponseEntity<>(
+                    new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.customerIdNotMatched, null),
+                    HttpStatus.BAD_REQUEST
+            );
 
+        }
         String accountNumber = accountResponse.getData();
         if(accountNumber == null){
            return new ResponseEntity<>( new ApiResponse<LoanResponse>(HttpStatus.NOT_FOUND.value(), ConstantMessages.accountNotFound,null),HttpStatus.NOT_FOUND);
@@ -42,7 +55,7 @@ public class LoanService {
         BigDecimal emi = calculateEmi(request.getAmount(), rate, request.getTenure());
 
         Loan loan = new Loan();
-        loan.setCustomerId(request.getCustomerId());
+        loan.setCustomerId(customerResponse.getId());
         loan.setMobileNumber(request.getMobileNumber());
         loan.setAccountNumber(accountNumber);
         loan.setAmount(request.getAmount());

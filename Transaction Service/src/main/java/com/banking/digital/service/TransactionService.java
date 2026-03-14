@@ -36,61 +36,93 @@ public class TransactionService {
     @Transactional
     @CircuitBreaker(name = "accountService", fallbackMethod = "fallbackTransfer")
     public ResponseEntity<ApiResponse<String>> transfer(TransferRequest request) {
-
+        // Check duplicate reference
         if (repository.existsByReferenceId(request.getReferenceId())) {
-            return new ResponseEntity<>(new ApiResponse<>(HttpStatus.BAD_REQUEST.value(), ConstantMessages.duplicateTrsReq,ConstantMessages.transactionId),HttpStatus.BAD_REQUEST);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(HttpStatus.BAD_REQUEST.value(),
+                            ConstantMessages.duplicateTrsReq,
+                            ConstantMessages.transactionId));
         }
-        try {
-            String fromAccountNumber = null;
-            String toAccountNumber = null;
 
+        try {
+            // Validate accounts
             ApiResponse<String> fromResponse = accountClient.getAccountNumberByAccountNumber(request.getFromAccount());
-            if (fromResponse != null) {
-                fromAccountNumber = fromResponse.getApiResponse();
-            } else {
-                return new ResponseEntity<>(new ApiResponse<>(HttpStatus.NOT_FOUND.value(), ConstantMessages.invalidWithdraw,ConstantMessages.properFromAccount),HttpStatus.NOT_FOUND);
+            if (fromResponse == null || fromResponse.getApiResponse() == null) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(HttpStatus.NOT_FOUND.value(),
+                                ConstantMessages.invalidWithdraw,
+                                ConstantMessages.properFromAccount));
             }
 
             ApiResponse<String> toResponse = accountClient.getAccountNumberByAccountNumber(request.getToAccount());
-            if (toResponse != null) {
-                toAccountNumber = toResponse.getApiResponse();
-            } else {
-                return new ResponseEntity<>(new ApiResponse<>(HttpStatus.NOT_FOUND.value(), ConstantMessages.invalidDeposit,ConstantMessages.properToAccount),HttpStatus.NOT_FOUND);
+            if (toResponse == null || toResponse.getApiResponse() == null) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body(new ApiResponse<>(HttpStatus.NOT_FOUND.value(),
+                                ConstantMessages.invalidDeposit,
+                                ConstantMessages.properToAccount));
             }
+
+            // Create transaction record
+            Transaction txn = new Transaction();
+            txn.setReferenceId(request.getReferenceId());
+            txn.setFromAccount(request.getFromAccount());
+            txn.setToAccount(request.getToAccount());
+            txn.setAmount(request.getAmount());
+            txn.setStatus(TransactionStatus.INITIATED);
+            repository.save(txn);
+
+            // Perform withdraw
+            AccountTransactionRequest withdrawReq = new AccountTransactionRequest();
+            withdrawReq.setAccountNumber(request.getFromAccount());
+            withdrawReq.setAmount(request.getAmount());
+            accountClient.withdraw(withdrawReq);
+
+            // Perform deposit
+            AccountTransactionRequest depositReq = new AccountTransactionRequest();
+            depositReq.setAccountNumber(request.getToAccount());
+            depositReq.setAmount(request.getAmount());
+            accountClient.deposit(depositReq);
+
+            // Update transaction status
+            txn.setStatus(TransactionStatus.SUCCESS);
+            repository.save(txn);
+
+            // Send notifications
+            Map<String, String> notification = new HashMap<>();
+            notification.put("recipient", request.getFromAccount());
+            notification.put("message", "Transaction Successful: ₹" + request.getAmount());
+            notification.put("type", "EMAIL");
+            notificationClient.sendNotification(notification);
+
+            notification.put("recipient", request.getToAccount());
+            notification.put("message", "Amount Credited: ₹" + request.getAmount());
+            notificationClient.sendNotification(notification);
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(new ApiResponse<>(HttpStatus.OK.value(),
+                            ConstantMessages.transactionSuccess,
+                            txn.getReferenceId()));
+
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            // Rollback or mark failed
+            Transaction txn = new Transaction();
+            txn.setReferenceId(request.getReferenceId());
+            txn.setFromAccount(request.getFromAccount());
+            txn.setToAccount(request.getToAccount());
+            txn.setAmount(request.getAmount());
+            txn.setStatus(TransactionStatus.FAILED);
+            repository.save(txn);
+
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            ConstantMessages.transactionFail,
+                            e.getMessage()));
         }
-
-
-        AccountTransactionRequest withdrawReq = new AccountTransactionRequest();
-        withdrawReq.setAccountNumber(request.getFromAccount());
-        withdrawReq.setAmount(request.getAmount());
-
-        accountClient.withdraw(withdrawReq);
-
-        AccountTransactionRequest depositReq = new AccountTransactionRequest();
-        depositReq.setAccountNumber(request.getToAccount());
-        depositReq.setAmount(request.getAmount());
-
-        accountClient.deposit(depositReq);
-        Transaction txn = new Transaction();
-        txn.setReferenceId(request.getReferenceId());
-        txn.setFromAccount(request.getFromAccount());
-        txn.setToAccount(request.getToAccount());
-        txn.setAmount(request.getAmount());
-        txn.setStatus(TransactionStatus.INITIATED);
-        repository.save(txn);
-
-        txn.setStatus(TransactionStatus.SUCCESS);
-        repository.save(txn);
-        // Send Notification
-        Map<String, String> notification = new HashMap<>();
-        notification.put("recipient", request.getFromAccount());
-        notification.put("message", "Transaction Successful: ₹" + request.getAmount());
-        notification.put("type", "EMAIL");
-
-        notificationClient.sendNotification(notification);
-        return new ResponseEntity<>(new ApiResponse<>(HttpStatus.ACCEPTED.value(),  ConstantMessages.transactionSuccess,ConstantMessages.transactionSuccess),HttpStatus.ACCEPTED);
     }
     public ResponseEntity<ApiResponse<String>> fallbackTransfer(TransferRequest request, Throwable ex) {
 

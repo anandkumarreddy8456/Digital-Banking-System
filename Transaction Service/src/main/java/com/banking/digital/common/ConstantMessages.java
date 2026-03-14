@@ -13,4 +13,5 @@ public class ConstantMessages {
     public static final String internalServerError="INTERNAL SERVER ERROR";
     public static final String invalidAccount="INVALID ACCOUNT NUMBER";
 
+    public static String transactionFailed;
 }
